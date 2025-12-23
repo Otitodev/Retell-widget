@@ -1,145 +1,186 @@
 // Load Retell SDK from CDN
 const script = document.createElement('script');
-script.src = 'https://cdn.jsdelivr.net/npm/retell-client-js-sdk@latest/dist/retell-client-js-sdk.min.js';
+script.src = 'https://unpkg.com/retell-client-js-sdk@latest/dist/retell-client-js-sdk.min.js';
 script.onload = initializeRetellWidget;
+script.onerror = () => {
+  // Fallback to jsdelivr
+  const script2 = document.createElement('script');
+  script2.src = 'https://cdn.jsdelivr.net/npm/retell-client-js-sdk@latest/dist/retell-client-js-sdk.min.js';
+  script2.onload = initializeRetellWidget;
+  document.head.appendChild(script2);
+};
 document.head.appendChild(script);
 
 function initializeRetellWidget() {
-  const { RetellWebClient } = window.RetellSDK;
-  const client = new RetellWebClient();
+  try {
+    // Try different ways to access the SDK
+    let RetellWebClient;
+    
+    if (window.RetellSDK && window.RetellSDK.RetellWebClient) {
+      RetellWebClient = window.RetellSDK.RetellWebClient;
+    } else if (window.RetellWebClient) {
+      RetellWebClient = window.RetellWebClient;
+    } else if (window.Retell && window.Retell.RetellWebClient) {
+      RetellWebClient = window.Retell.RetellWebClient;
+    } else {
+      throw new Error('RetellWebClient not found');
+    }
 
-  let isCallActive = false;
+    const client = new RetellWebClient();
+    let isCallActive = false;
 
-  // Inject UI
-  const fab = document.createElement("div");
-  fab.id = "retell-fab";
-  fab.innerHTML = "💬";
+    // Inject UI
+    const fab = document.createElement("div");
+    fab.id = "retell-fab";
+    fab.innerHTML = "💬";
 
-  const panel = document.createElement("div");
-  panel.id = "retell-panel";
-  panel.innerHTML = `
-    <div id="retell-header">
-      <h4>Voice Assistant</h4>
-      <button id="retell-close">×</button>
-    </div>
-    <div id="retell-status">Ready to start call</div>
-    <button id="retell-start">Start Call</button>
-    <button id="retell-end" disabled>End Call</button>
-    <div id="retell-transcript-container">
-      <h5>Transcript:</h5>
-      <div id="retell-transcript"></div>
-    </div>
-  `;
+    const panel = document.createElement("div");
+    panel.id = "retell-panel";
+    panel.innerHTML = `
+      <div id="retell-header">
+        <div id="retell-header-content">
+          <div id="retell-header-icon">🎧</div>
+          <div id="retell-header-text">
+            <h4>Voice Assistant</h4>
+            <p>Live Voice Agent</p>
+          </div>
+        </div>
+        <button id="retell-close">×</button>
+      </div>
+      <div id="retell-content">
+        <div id="retell-instruction">
+          Tap the call button to start talking.
+        </div>
+        <div id="retell-status-section">
+          <span id="retell-status-label">Status:</span>
+          <span id="retell-status" class="offline">Offline</span>
+        </div>
+        <button id="retell-call-button" class="start">
+          <span id="retell-call-icon">📞</span>
+          <span id="retell-call-text">Call</span>
+        </button>
+        <div id="retell-transcript-container">
+          <div id="retell-transcript"></div>
+        </div>
+      </div>
+    `;
 
-  document.body.appendChild(fab);
-  document.body.appendChild(panel);
+    document.body.appendChild(fab);
+    document.body.appendChild(panel);
 
-  // Event handlers
-  fab.onclick = () => {
-    panel.style.display = panel.style.display === "none" ? "block" : "none";
-  };
+    const statusEl = document.getElementById("retell-status");
+    const callButton = document.getElementById("retell-call-button");
+    const callText = document.getElementById("retell-call-text");
+    const callIcon = document.getElementById("retell-call-icon");
+    const transcriptContainer = document.getElementById("retell-transcript-container");
 
-  document.getElementById("retell-close").onclick = () => {
-    panel.style.display = "none";
-  };
+    // Event handlers
+    fab.onclick = () => {
+      const isVisible = panel.style.display !== "none";
+      panel.style.display = isVisible ? "none" : "block";
+    };
 
-  document.getElementById("retell-start").onclick = async () => {
-    try {
-      document.getElementById("retell-status").innerText = "Connecting...";
-      
-      // Fetch access token from Make.com webhook
-      const res = await fetch(RETELL_CONFIG.makeWebhook, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+    document.getElementById("retell-close").onclick = () => {
+      panel.style.display = "none";
+    };
+
+    callButton.onclick = async () => {
+      if (!isCallActive) {
+        // Start call
+        try {
+          statusEl.innerText = "Connecting...";
+          statusEl.className = "connecting";
+          callButton.disabled = true;
+          
+          const res = await fetch(RETELL_CONFIG.makeWebhook, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          
+          const responseText = await res.text();
+          let accessToken = responseText.trim();
+
+          await client.startCall({
+            accessToken: accessToken,
+            sampleRate: 24000,
+            enableUpdate: true
+          });
+
+        } catch (error) {
+          console.error('Failed to start call:', error);
+          statusEl.innerText = "Connection failed";
+          statusEl.className = "offline";
+          callButton.disabled = false;
         }
-      });
-      
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+      } else {
+        // End call
+        client.stopCall();
       }
-      
-      const responseText = await res.text();
-      let accessToken;
-      
-      // Try to parse as JSON first
-      try {
-        const data = JSON.parse(responseText);
-        accessToken = data.access_token || data.accessToken || data;
-      } catch (e) {
-        // If not JSON, treat as raw token string
-        accessToken = responseText.trim();
-      }
-      
-      if (!accessToken) {
-        throw new Error('No access token received');
-      }
+    };
 
-      // Start the call with access token
-      await client.startCall({
-        accessToken: accessToken,
-        sampleRate: 24000, // Optional: set sample rate
-        enableUpdate: true // Enable real-time updates
-      });
-
-      document.getElementById("retell-start").disabled = true;
-      document.getElementById("retell-end").disabled = false;
-      document.getElementById("retell-status").innerText = "Call active";
+    // Event listeners
+    client.on("call_started", () => {
+      console.log("Call started");
+      statusEl.innerText = "Connected";
+      statusEl.className = "online";
       isCallActive = true;
+      callButton.className = "end";
+      callButton.disabled = false;
+      callText.innerText = "End Call";
+      callIcon.innerText = "📞";
+      transcriptContainer.classList.add("show");
+    });
 
-    } catch (error) {
-      console.error('Failed to start call:', error);
-      document.getElementById("retell-status").innerText = "Failed to connect: " + error.message;
-    }
-  };
+    client.on("call_ended", () => {
+      console.log("Call ended");
+      statusEl.innerText = "Offline";
+      statusEl.className = "offline";
+      isCallActive = false;
+      callButton.className = "start";
+      callButton.disabled = false;
+      callText.innerText = "Call";
+      callIcon.innerText = "📞";
+    });
 
-  document.getElementById("retell-end").onclick = () => {
-    if (isCallActive) {
-      client.stopCall();
-    }
-  };
+    client.on("agent_start_talking", () => {
+      statusEl.innerText = "Agent speaking...";
+      statusEl.className = "online";
+    });
 
-  // Event listeners for call status
-  client.on("call_started", () => {
-    console.log("Call started");
-    document.getElementById("retell-status").innerText = "Call connected";
-    isCallActive = true;
-  });
+    client.on("agent_stop_talking", () => {
+      statusEl.innerText = "Listening...";
+      statusEl.className = "online";
+    });
 
-  client.on("call_ended", () => {
-    console.log("Call ended");
-    document.getElementById("retell-start").disabled = false;
-    document.getElementById("retell-end").disabled = true;
-    document.getElementById("retell-status").innerText = "Call ended";
-    isCallActive = false;
-  });
+    client.on("update", (update) => {
+      if (update.transcript && update.transcript.length > 0) {
+        const transcriptDiv = document.getElementById("retell-transcript");
+        const transcriptText = update.transcript
+          .map(t => `${t.role === 'agent' ? 'Agent' : 'You'}: ${t.content}`)
+          .join('\n\n');
+        transcriptDiv.innerText = transcriptText;
+        transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+      }
+    });
 
-  client.on("agent_start_talking", () => {
-    document.getElementById("retell-status").innerText = "Agent speaking...";
-  });
+    client.on("error", (error) => {
+      console.error("Retell error:", error);
+      statusEl.innerText = "Error occurred";
+      statusEl.className = "offline";
+      isCallActive = false;
+      callButton.className = "start";
+      callButton.disabled = false;
+      callText.innerText = "Call";
+      callIcon.innerText = "📞";
+    });
 
-  client.on("agent_stop_talking", () => {
-    document.getElementById("retell-status").innerText = "Listening...";
-  });
-
-  client.on("update", (update) => {
-    if (update.transcript && update.transcript.length > 0) {
-      const transcriptDiv = document.getElementById("retell-transcript");
-      const transcriptText = update.transcript
-        .map(t => `${t.role}: ${t.content}`)
-        .join('\n');
-      transcriptDiv.innerText = transcriptText;
-      
-      // Auto-scroll to bottom
-      transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
-    }
-  });
-
-  client.on("error", (error) => {
-    console.error("Retell error:", error);
-    document.getElementById("retell-status").innerText = "Error: " + error.message;
-    isCallActive = false;
-    document.getElementById("retell-start").disabled = false;
-    document.getElementById("retell-end").disabled = true;
-  });
+  } catch (error) {
+    console.error('Failed to initialize Retell widget:', error);
+  }
 }

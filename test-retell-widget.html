@@ -7,77 +7,256 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 56px;
-            height: 56px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            background: #007cba;
+            background: #347D9B;
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 9999;
-            font-size: 22px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(52, 125, 155, 0.3);
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        #retell-fab:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 12px 40px rgba(52, 125, 155, 0.4);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
         }
 
         #retell-panel {
             position: fixed;
-            bottom: 90px;
+            bottom: 100px;
             right: 20px;
-            width: 320px;
+            width: 380px;
             background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             z-index: 9999;
             display: none;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         #retell-header {
+            background: linear-gradient(135deg, #347D9B 0%, #4A90B8 100%);
+            color: white;
+            padding: 20px 24px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 15px 20px 10px;
-            border-bottom: 1px solid #eee;
+            justify-content: space-between;
+        }
+
+        #retell-header-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #retell-header-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        #retell-header-text h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        #retell-header-text p {
+            margin: 2px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        #retell-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #retell-close:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        #retell-content {
+            padding: 32px 24px 24px;
+            text-align: center;
+        }
+
+        #retell-instruction {
+            color: #6B7280;
+            font-size: 16px;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        #retell-status-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: #F9FAFB;
+            border-radius: 12px;
+        }
+
+        #retell-status-label {
+            font-size: 14px;
+            color: #6B7280;
+            font-weight: 500;
         }
 
         #retell-status {
-            padding: 10px 20px;
             font-size: 14px;
-            color: #666;
-            background: #f8f9fa;
+            font-weight: 600;
+            color: #374151;
         }
 
-        #retell-panel button {
-            width: calc(100% - 40px);
-            margin: 10px 20px;
-            padding: 12px;
+        #retell-status.offline {
+            color: #6B7280;
+        }
+
+        #retell-status.connecting {
+            color: #F59E0B;
+        }
+
+        #retell-status.online {
+            color: #10B981;
+        }
+
+        #retell-call-button {
+            width: 100%;
+            padding: 16px 24px;
             border: none;
-            border-radius: 6px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 14px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        #retell-start {
-            background: #007cba;
+        #retell-call-button.start {
+            background: #347D9B;
             color: white;
         }
 
-        #retell-end {
-            background: #dc3545;
+        #retell-call-button.start:hover:not(:disabled) {
+            background: #2A6B87;
+            transform: translateY(-1px);
+        }
+
+        #retell-call-button.end {
+            background: #EF4444;
             color: white;
+        }
+
+        #retell-call-button.end:hover:not(:disabled) {
+            background: #DC2626;
+            transform: translateY(-1px);
+        }
+
+        #retell-call-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        #retell-call-icon {
+            font-size: 18px;
+        }
+
+        #retell-transcript-container {
+            margin-top: 24px;
+            display: none;
+        }
+
+        #retell-transcript-container.show {
+            display: block;
         }
 
         #retell-transcript {
-            font-size: 13px;
-            max-height: 150px;
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 16px;
+            max-height: 200px;
             overflow-y: auto;
-            background: #f8f9fa;
-            padding: 10px;
-            margin: 15px 20px 20px;
-            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
             white-space: pre-wrap;
+            border: 1px solid #E5E7EB;
+        }
+
+        #retell-transcript::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #retell-transcript::-webkit-scrollbar-track {
+            background: #F3F4F6;
+            border-radius: 3px;
+        }
+
+        #retell-transcript::-webkit-scrollbar-thumb {
+            background: #D1D5DB;
+            border-radius: 3px;
+        }
+
+        #retell-transcript::-webkit-scrollbar-thumb:hover {
+            background: #9CA3AF;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 480px) {
+            #retell-panel {
+                width: calc(100vw - 40px);
+                right: 20px;
+                left: 20px;
+            }
         }
     </style>
 </head>
@@ -102,13 +281,31 @@
             panel.id = "retell-panel";
             panel.innerHTML = `
                 <div id="retell-header">
-                    <h4>Voice Assistant</h4>
+                    <div id="retell-header-content">
+                        <div id="retell-header-icon">🎧</div>
+                        <div id="retell-header-text">
+                            <h4>Voice Assistant</h4>
+                            <p>Live Voice Agent</p>
+                        </div>
+                    </div>
                     <button id="retell-close">×</button>
                 </div>
-                <div id="retell-status">Loading SDK...</div>
-                <button id="retell-start" disabled>Start Call</button>
-                <button id="retell-end" disabled>End Call</button>
-                <div id="retell-transcript"></div>
+                <div id="retell-content">
+                    <div id="retell-instruction">
+                        Tap the call button to start talking.
+                    </div>
+                    <div id="retell-status-section">
+                        <span id="retell-status-label">Status:</span>
+                        <span id="retell-status" class="offline">Loading SDK...</span>
+                    </div>
+                    <button id="retell-call-button" class="start" disabled>
+                        <span id="retell-call-icon">📞</span>
+                        <span id="retell-call-text">Call</span>
+                    </button>
+                    <div id="retell-transcript-container">
+                        <div id="retell-transcript"></div>
+                    </div>
+                </div>
             `;
 
             document.body.appendChild(fab);
@@ -116,7 +313,8 @@
 
             // Basic event handlers
             fab.onclick = () => {
-                panel.style.display = panel.style.display === "none" ? "block" : "none";
+                const isVisible = panel.style.display !== "none";
+                panel.style.display = isVisible ? "none" : "block";
             };
 
             document.getElementById("retell-close").onclick = () => {
@@ -184,48 +382,54 @@
                 const client = new RetellWebClient();
                 let isCallActive = false;
 
-                document.getElementById("retell-status").innerText = "Ready to start call";
-                document.getElementById("retell-start").disabled = false;
+                const statusEl = document.getElementById("retell-status");
+                const callButton = document.getElementById("retell-call-button");
+                const callText = document.getElementById("retell-call-text");
+                const callIcon = document.getElementById("retell-call-icon");
+                const transcriptContainer = document.getElementById("retell-transcript-container");
 
-                document.getElementById("retell-start").onclick = async () => {
-                    try {
-                        document.getElementById("retell-status").innerText = "Connecting...";
-                        
-                        const res = await fetch(RETELL_CONFIG.makeWebhook, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
+                statusEl.innerText = "Offline";
+                statusEl.className = "offline";
+                callButton.disabled = false;
+
+                callButton.onclick = async () => {
+                    if (!isCallActive) {
+                        // Start call
+                        try {
+                            statusEl.innerText = "Connecting...";
+                            statusEl.className = "connecting";
+                            callButton.disabled = true;
+                            
+                            const res = await fetch(RETELL_CONFIG.makeWebhook, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            
+                            if (!res.ok) {
+                                throw new Error(`HTTP error! status: ${res.status}`);
                             }
-                        });
-                        
-                        if (!res.ok) {
-                            throw new Error(`HTTP error! status: ${res.status}`);
+                            
+                            const responseText = await res.text();
+                            let accessToken = responseText.trim();
+                            
+                            console.log('Access token received:', accessToken.substring(0, 20) + '...');
+
+                            await client.startCall({
+                                accessToken: accessToken,
+                                sampleRate: 24000,
+                                enableUpdate: true
+                            });
+
+                        } catch (error) {
+                            console.error('Failed to start call:', error);
+                            statusEl.innerText = "Connection failed";
+                            statusEl.className = "offline";
+                            callButton.disabled = false;
                         }
-                        
-                        const responseText = await res.text();
-                        let accessToken = responseText.trim();
-                        
-                        console.log('Access token received:', accessToken.substring(0, 20) + '...');
-
-                        await client.startCall({
-                            accessToken: accessToken,
-                            sampleRate: 24000,
-                            enableUpdate: true
-                        });
-
-                        document.getElementById("retell-start").disabled = true;
-                        document.getElementById("retell-end").disabled = false;
-                        document.getElementById("retell-status").innerText = "Call active";
-                        isCallActive = true;
-
-                    } catch (error) {
-                        console.error('Failed to start call:', error);
-                        document.getElementById("retell-status").innerText = "Failed to connect: " + error.message;
-                    }
-                };
-
-                document.getElementById("retell-end").onclick = () => {
-                    if (isCallActive) {
+                    } else {
+                        // End call
                         client.stopCall();
                     }
                 };
@@ -233,32 +437,43 @@
                 // Event listeners
                 client.on("call_started", () => {
                     console.log("Call started");
-                    document.getElementById("retell-status").innerText = "Call connected";
+                    statusEl.innerText = "Connected";
+                    statusEl.className = "online";
                     isCallActive = true;
+                    callButton.className = "end";
+                    callButton.disabled = false;
+                    callText.innerText = "End Call";
+                    callIcon.innerText = "📞";
+                    transcriptContainer.classList.add("show");
                 });
 
                 client.on("call_ended", () => {
                     console.log("Call ended");
-                    document.getElementById("retell-start").disabled = false;
-                    document.getElementById("retell-end").disabled = true;
-                    document.getElementById("retell-status").innerText = "Call ended";
+                    statusEl.innerText = "Offline";
+                    statusEl.className = "offline";
                     isCallActive = false;
+                    callButton.className = "start";
+                    callButton.disabled = false;
+                    callText.innerText = "Call";
+                    callIcon.innerText = "📞";
                 });
 
                 client.on("agent_start_talking", () => {
-                    document.getElementById("retell-status").innerText = "Agent speaking...";
+                    statusEl.innerText = "Agent speaking...";
+                    statusEl.className = "online";
                 });
 
                 client.on("agent_stop_talking", () => {
-                    document.getElementById("retell-status").innerText = "Listening...";
+                    statusEl.innerText = "Listening...";
+                    statusEl.className = "online";
                 });
 
                 client.on("update", (update) => {
                     if (update.transcript && update.transcript.length > 0) {
                         const transcriptDiv = document.getElementById("retell-transcript");
                         const transcriptText = update.transcript
-                            .map(t => `${t.role}: ${t.content}`)
-                            .join('\n');
+                            .map(t => `${t.role === 'agent' ? 'Agent' : 'You'}: ${t.content}`)
+                            .join('\n\n');
                         transcriptDiv.innerText = transcriptText;
                         transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
                     }
@@ -266,10 +481,13 @@
 
                 client.on("error", (error) => {
                     console.error("Retell error:", error);
-                    document.getElementById("retell-status").innerText = "Error: " + error.message;
+                    statusEl.innerText = "Error occurred";
+                    statusEl.className = "offline";
                     isCallActive = false;
-                    document.getElementById("retell-start").disabled = false;
-                    document.getElementById("retell-end").disabled = true;
+                    callButton.className = "start";
+                    callButton.disabled = false;
+                    callText.innerText = "Call";
+                    callIcon.innerText = "📞";
                 });
 
             } catch (error) {
