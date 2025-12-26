@@ -581,11 +581,15 @@
     }
 
     // Event handlers
-    elements.fab.addEventListener('click', (e) => {
-      console.log('🎧 FAB clicked');
-      const isVisible = elements.panel.style.display !== 'none';
-      elements.panel.style.display = isVisible ? 'none' : 'block';
-    });
+elements.fab.addEventListener('click', (e) => {
+  console.log('🎧 FAB clicked');
+  
+  // FIX: Check if the style IS 'block'. 
+  // If it is empty string (initial load) or 'none', this returns false.
+  const isVisible = elements.panel.style.display === 'block';
+  
+  elements.panel.style.display = isVisible ? 'none' : 'block';
+});
 
     // Keyboard support
     elements.fab.addEventListener('keydown', (e) => {
